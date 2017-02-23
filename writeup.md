@@ -32,14 +32,14 @@ My pipeline consisted of 6 steps.
 3. Detect edges using Canny edge detector: `edge_img = canny(blurred_img, 50, 150)`
 
 4. Mask the region that contains the lanes. Here I chose 4 vertices from basically observing all the test images and videos:
-```
+    ```
     vertices = np.array([[(x_size*0.5, y_size-1),
                            (x_size*0.95, y_size-1),
                            (x_size*0.51, y_size*0.58),
                            (x_size*0.49, y_size*0.58)]], dtype=np.int32)
     masked_edges = region_of_interest(edge_img, vertices)
-```
-where `x_size=img.shape[1]`, `y_size=img.shape[0]`.
+    ```
+    where `x_size=img.shape[1]`, `y_size=img.shape[0]`.
 
 5. Run Hough transformation `hough_output = hough_lines(masked_edges, rho, theta, threshold, min_line_length, max_line_gap)`. I chose `rho=1 px`, `theta=np.pi/180.00` (1 degree), `threshold = 25`, `min_line_length=5`, `max_line_gap=1`.
 
@@ -49,10 +49,15 @@ I tested my pipeline on all the test images (in a separate cell). And I save the
 
 #### How to draw a single line instead of a set of line segments
 
-In order to draw a single line on the left and right lanes, I followed the hints the `draw_lines()` function. I created a new function `draw_lines_v2()`, and call it in `hough_lines()`. Here is the procedure of `draw_lines_v2()`.
+In order to draw a single line on the left and right lanes, I followed the hints the `draw_lines()` function. I created a new function `draw_lines_v2()`, and call it in `hough_lines()`. 
 
+The basic procedure is like this
 
+1. We group the line segments given by hough transform in to 2 groups, left lane and right lane. The criterior for the segmentation are slope and position, i.e., the left lane has negative slope (since the origin is at top left) between -0.5 and -1.5, and is located on the left side of image; similar for the right lane.
+    
+2. Find the average slope of each group (left lane and right lane). I used weighted average of the slopes with the weight being the length of each line segments in the group.
 
+3. Find one end point, i.e., the intersection with the bottom of the image of each group. What I did was to draw a line with the slope calcuated above crossing each end point of each line segment, and check it's `x` coordinate intersection with the bottom of the image. Then I remove the outliers and calcuate the average.
 
 ###2. Identify potential shortcomings with your current pipeline
 
