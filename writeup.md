@@ -45,7 +45,7 @@ My pipeline consisted of 6 steps.
 
 6. Overlay the `hough_output` with the original image, to draw red line segments on the original image.
 
-I tested my pipeline on all the test images (in a separate cell). And I save the resuting images in the same `test_img` folder with `result_` prefix for file name.
+I tested my pipeline on all the test images (in a separate cell). And I save the resulting images in another folder `test_img_results` folder with `result_` prefix to file name.
 
 #### How to draw a single line instead of a set of line segments
 
@@ -53,7 +53,7 @@ In order to draw a single line on the left and right lanes, I followed the hints
 
 The basic procedure is like this
 
-1. We group the line segments given by hough transform in to 2 groups, left lane and right lane. The criterior for the segmentation are slope and position, i.e., the left lane has negative slope (since the origin is at top left) between -0.5 and -1.5, and is located on the left side of image; similar for the right lane.
+1. Group the line segments given by Hough transform in to 2 groups, left lane and right lane. The criterior for the segmentation are slope and position, i.e., the left lane has negative slope (since the origin is at top left) between -0.5 and -1.5, and is located on the left side of image; similar for the right lane.
     
 2. Find the average slope of each group (left lane and right lane). I used weighted average of the slopes with the weight being the length of each line segments in the group.
 
@@ -61,14 +61,18 @@ The basic procedure is like this
 
 ###2. Identify potential shortcomings with your current pipeline
 
+There are some underlying assumptions with this code. 
 
-One potential shortcoming would be what would happen when ... 
+1. The car is always driving in the center of the lane (without lane crossing). So I can categorize my left and right lanes using the slope and position assumption (step 1 above).
 
-Another shortcoming could be ...
+2. The camera is not wide angle, so the current vertices for the region of interest works. Otherwise, my code will detect multiple lanes and the average will mess up.
+
 
 
 ###3. Suggest possible improvements to your pipeline
 
-A possible improvement would be to ...
+To draw a single line, I feel that my method (following the hints in draw_lines) of averaging slopes and positions can be improved. I think we can use line fitting (least square) to do a better job.
 
-Another potential improvement could be to ...
+Also, I notice that the final straight line jumps a little from frame to frame. In order to make it smoother, I think I can do some moving average from previous frames.
+
+Also, if I know the lane line is either white or yellow, I should be able to do some color threshold to remove edges from things like curbs.
